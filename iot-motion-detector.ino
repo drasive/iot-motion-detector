@@ -69,7 +69,6 @@ void setup() {
   }
 
   // Update light status
-  // TOOD: Check for millis() overflow
   Serial.println();
   g_light_status = hue_is_light_on(c_hue_light_id);
   g_light_status_last_update_time = millis();

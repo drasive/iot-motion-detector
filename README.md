@@ -2,15 +2,15 @@
 
 A $6 internet of things and easy to build motion detector.  
 
-This particular implementation is focused on Philips Hue, but any IoT application can be implemented using the builtin WiFi adapter.
+This implementation controls a Philips Hue light, but any IoT application can be implemented using the builtin WiFi adapter.
 
 ## Hardware
 Name                                 | Type            | Price (USD) | Link
 -------------------------------------|-----------------|-------------|-----
-WeMos D1 mini V2.2.0 (ESP8266 board) | Microcontroller | 4.09        | https://www.banggood.com/WeMos-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html
-HC-SR501                             | Motion detector | 1.95        | https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html
+WeMos D1 mini V2.2.0 (ESP8266 board) | Microcontroller | 4.09        | [banggood.com](https://www.banggood.com/WeMos-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html)
+HC-SR501                             | Motion detector | 1.95        | [banggood.com(https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html)
 
-Total cost (excluding shipping and equipment, recorded 2017-09-16): USD 6.03
+Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 
 ### Required equipment
 * Jumper wires
@@ -22,6 +22,27 @@ Total cost (excluding shipping and equipment, recorded 2017-09-16): USD 6.03
 
 ### Wiring
 [TODO]
+
+### Power Consumption
+The values in this section are calculated, I do not have the required hardware to make measurements.
+
+#### Standby
+Sensing for motion, not sending/receiving over WiFi.
+
+Component | State          | Power Draw (mA)
+----------|----------------|----------------
+ESP8266   | Modem-Sleep(³) | 15
+HC-SR501  | On             |  0.065
+Total: 15.065mA
+
+#### Active
+Sensing for motion, sending/receiving over WiFi.
+
+Component | State         | Power Draw (mA)
+----------|---------------|----------------
+ESP8266   | Tx 802.11b(³) | 170
+HC-SR501  | On            |   0.065
+Total: 170.065mA
 
 ### Using Different Hardware
 You can quite easily build this project with other ESP8266 boards and motion sensors other than the HC-SR501.
@@ -63,7 +84,7 @@ debug                       | bool     | false                      | Output deb
 *Confidential information, keep private
 
 ### Libraries
-- ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
+- [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
 
 ### Functionality
 #### Status LED
@@ -88,7 +109,7 @@ When motion is detected the light is turned on.
 
 #### Turning light off
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
-When motion is detected again while the light is still on the timer for keeping the light on is reset.
+When motion is detected again while the light is still on the timer is reset.
 
 #### Polling light status
 As external factors can influence the state of the light (e.g. control with the Philips Hue app) is is polled periodically (configuration value "light_update_interval").
@@ -100,15 +121,14 @@ Information about interrupts, actions and requests are logged to the serial inte
 Additional debug information can be turned on (configuration value "debug").
 
 ### Arduino IDE Board Settings
-Board: WeMos D1 R2 & mini
-CPU Frequency: 80 MHz
-Flash Size: 4M (3M SPIFFS)
+Board: WeMos D1 R2 & mini  
+CPU Frequency: 80 MHz  
+Flash Size: 4M (3M SPIFFS)  
 Upload Speed: 57600
 
 ### Improvement Ideas
-- Support for dynamic action based on daytime/nighttime. Requires knowledge of wall clock (NTP).
+- Support for different action during daytime/nighttime. Requires knowledge of wall clock (NTP).
 - Support for reconnecting to WiFi network if needed
-- Handle overflow of millis()
 - Support for OTA updating of configuration values
 
 
@@ -156,34 +176,6 @@ The system should be able to be powered by a single power cable or batteries.
 
 The ESP8266 is powered by a micro USB cable. This enables the use of a USB power adaptor and battery packs.  
 The HC-SR501 is powered directly with 5V by the ESP8266.
-
-### Power Consumption
-The values in this section are calculated, I do not have the required hardware to make measurements.
-
-#### Standby
-Sensing for motion, not sending/receiving over WiFi.
-
-Component | State          | Power Draw (mA)
-----------|----------------|----------------
-ESP8266   | Modem-Sleep(³) | 15
-HC-SR501  | On             |  0.065
-Total: 15.065mA
-
-#### Active
-Sensing for motion, sending/receiving over WiFi.
-
-Component | State         | Power Draw (mA)
-----------|---------------|----------------
-ESP8266   | Tx 802.11b(³) | 170
-HC-SR501  | On            |   0.065
-Total: 170.065mA
-
-### Software development
-Implementation goals for the initial version:
-- Low rate of false positives/false negatives for detected motion (< 1%)
-- Stable control of a single Hue light (> 95% success rate of commands) 
-- Response time (motion to light on) < 3 seconds
-- Stable execution for 24 hours after boot
 
 ### HC-SR501 False Positives
 The HC-SR501 initially fired a lot of false positives. Putting a 10k Ohm resistor in the data line seems to have solved this problem (see section "Wiring").
