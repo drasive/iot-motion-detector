@@ -68,7 +68,7 @@ void setup() {
 }
 
 void loop() {
-  ensure_wifi_connected();
+  ensure_wifi_connected(c_wifi_ssid, c_wifi_password);
 
   bool sending_commands_allowed =
     g_motion_last_detected_time == 0 // Do not act until motion has been detected at least once
@@ -84,11 +84,11 @@ void loop() {
 
       if (command_status == 1) {
         g_light_last_turned_on_time = millis();
-      }
 
-      Serial.print(F("Response time: "));
-      Serial.print(millis() - g_motion_last_detected_time);
-      Serial.println(F(" ms"));
+        Serial.print(F("Response time: "));
+        Serial.print(millis() - g_motion_last_detected_time);
+        Serial.println(F(" ms"));
+      }
     }
     else {
       // Motion detector wasn't activated recently
@@ -234,9 +234,11 @@ void update_ntp_time() {
   print_name_value("NTP Host", c_ntp_host);
   print_name_value("NTP Offset", String(c_ntp_offset));
 
+  uint32_t request_sent_time = millis();
   g_ntp_client.forceUpdate();
+  print_with_duration("Response from NTP server received", request_sent_time);
 
-  Serial.print(F("Current time: "));
+  Serial.print(F("System time: "));
   Serial.println(g_ntp_client.getFormattedTime());
 }
 

@@ -71,7 +71,7 @@ wifi_ssid                   | char*    | -                          | SSID of th
 wifi_password               | char*    | -                          | Password for the Wifi network*
 wifi_timeout                | uint16_t | 15 * 1000 (15s)            | Timeout for connecting to the WiFi network in milliseconds
 ntp_host                    | char*    | pool.ntp.org               | Hostname of the NTP server
-ntp_offset                  | int32_t  | 0                          | Offset from the UCT time in milliseconds
+ntp_offset                  | int32_t  | 0                          | Offset from the UTC time in milliseconds
 ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Interval of NTP server synchronisation
 baud_rate                   | uint32_t | 115200                     | Baud rate for serial communication
 pin_status_led              | uint8_t  | [LED_BUILTIN]              | Pin number of the status LED
@@ -103,12 +103,16 @@ The amount of time required for initialization is usually bound by the configura
 The device reduces power usage to a minimum. A power cycle is required to restart.
 A shutdown can only occur during initialization (see section "Initialization").
 
-#### Turning light on
+#### Turning Light on
 When motion is detected the light is turned on.
 
-#### Turning light off
+#### Turning Light off
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
 When motion is detected again while the light is still on the timer is reset.
+
+### NTP Time Synchronization
+The device periodically (configuration value "ntp_update_interval") updates its internal clock with an NTP server (configuration value "ntp_host").
+This is a blocking operation and can slightly delay turning the light on/off.
 
 #### Serial Bus
 Information about interrupts, actions and requests are logged to the serial interface (USB port).
