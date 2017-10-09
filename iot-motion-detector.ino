@@ -39,9 +39,9 @@ const bool c_debug = false;                                  // Output debug inf
 
 
 // ===== Program =====
-volatile uint32_t g_last_motion_detected_time = 0;
+volatile uint32_t g_motion_last_detected_time = 0;
 uint32_t g_light_last_turned_on_time = 0;
-uint32_t g_time_last_update_time = 0;
+uint32_t g_time_last_updated_time = 0;
 
 
 void setup() {
@@ -92,13 +92,13 @@ void setup() {
 
 void loop() {
   bool sending_commands_allowed =
-    g_last_motion_detected_time == 0 // Do not act until motion has been detected at least once
+    g_motion_last_detected_time == 0 // Do not act until motion has been detected at least once
     || millis() - g_light_last_turned_on_time >= c_light_on_duration; // Do not act while light should still be turned on
 
   // Handle detected motion
   // TODO: Improve program flow clarity
-  if (g_last_motion_detected_time != 0 && sending_commands_allowed) {
-    if (millis() - g_last_motion_detected_time <= c_light_on_duration) {
+  if (g_motion_last_detected_time != 0 && sending_commands_allowed) {
+    if (millis() - g_motion_last_detected_time <= c_light_on_duration) {
       // Motion detector was activated recently
       Serial.println();
       Serial.println(F("== Turning light on =="));
@@ -118,10 +118,10 @@ void loop() {
   }
 
   // Update time
-  if (millis() - g_time_last_update_time >= c_ntp_update_interval) {
+  if (millis() - g_time_last_updated_time >= c_ntp_update_interval) {
     Serial.println(F("== Updating time =="));
 
-    g_time_last_update_time = millis();
+    g_time_last_updated_time = millis();
   }
 }
 
@@ -130,7 +130,7 @@ void interrupt_handler_motion_sensor() {
 
   digitalWrite(c_pin_status_led, motion_detected ? LOW : HIGH);
   if (motion_detected) {
-    g_last_motion_detected_time = millis();
+    g_motion_last_detected_time = millis();
   }
 
   Serial.print("# Motion sensor interrupt: ");
