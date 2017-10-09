@@ -36,7 +36,7 @@ const uint16_t c_wifi_timeout = 15 * 1000;                           // Timeout 
 
 const char* c_ntp_host = "pool.ntp.org";                             // Hostname of the NTP server
 const int32_t c_ntp_offset = 2 * 60 * 60 * 1000;                     // Offset from the UTC time in milliseconds
-const uint32_t c_ntp_update_interval = 24 * 60 * 60 * 1000;          // Interval of NTP server synchronisation
+const uint32_t c_ntp_update_interval = 24 * 60 * 60 * 1000;          // Interval of system clock synchronisation with NTP server
 
 const uint32_t c_baud_rate = 115200;                                 // Baud rate for serial communication
 const uint8_t c_pin_status_led = LED_BUILTIN;                        // Pin number of the status LED

@@ -69,7 +69,7 @@ hue_port                    | uint16_t | 80                         | Port of th
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
 hue_user_id                 | char*    | -                          | ID of the Hue Bridge user for authentication*
 hue_light_id                | char*    | -                          | ID of the Hue light to control
-hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":150} | Command to turn the Hue light on during daytime
+hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":254} | Command to turn the Hue light on during daytime
 hue_command_on_nighttime    | char*    | {\"on\":true, \"bri\":1}   | Command to turn the Hue light on during nighttime
 hue_command_off             | char*    | {\"on\":false}             | Command to turn the Hue light off
 wifi_ssid                   | char*    | -                          | SSID of the WiFi network*
@@ -77,7 +77,7 @@ wifi_password               | char*    | -                          | Password f
 wifi_timeout                | uint16_t | 15 * 1000 (15s)            | Timeout for connecting to the WiFi network in milliseconds
 ntp_host                    | char*    | pool.ntp.org               | Hostname of the NTP server
 ntp_offset                  | int32_t  | 0                          | Offset from the UTC time in milliseconds
-ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Interval of NTP server synchronisation
+ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Interval of system clock synchronisation with NTP server
 baud_rate                   | uint32_t | 115200                     | Baud rate for serial communication
 pin_status_led              | uint8_t  | [LED_BUILTIN]              | Pin number of the status LED
 pin_motion_sensor           | uint8_t  | 5                          | Pin number of the motion sensor (data pin)
@@ -115,6 +115,10 @@ When motion is detected the light is turned on.
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
 When motion is detected again while the light is still on the timer is reset.
 
+### Daytime/Nighttime
+Different on-commands can be defined for daytime/nighttime (configuration values "hue_command_on_daytime" and "hue_command_on_nighttime").
+When and how long nighttime is can be configured as well (configuration values "nighttime_start" and "nighttime_duration").
+
 ### NTP Time Synchronization
 The device periodically (configuration value "ntp_update_interval") updates its internal clock with an NTP server (configuration value "ntp_host").
 This is a blocking operation and can slightly delay turning the light on/off.
@@ -130,7 +134,6 @@ Flash Size: 4M (3M SPIFFS)
 Upload Speed: 57600
 
 ### Improvement Ideas
-- Support for different action during daytime/nighttime
 - Support for OTA updating of configuration values
 
 
