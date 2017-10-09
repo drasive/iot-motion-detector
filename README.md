@@ -121,8 +121,7 @@ Flash Size: 4M (3M SPIFFS)
 Upload Speed: 57600
 
 ### Improvement Ideas
-- Support for different action during daytime/nighttime. Requires knowledge of wall clock (NTP).
-- Support for reconnecting to WiFi network if needed
+- Support for different action during daytime/nighttime
 - Support for OTA updating of configuration values
 
 

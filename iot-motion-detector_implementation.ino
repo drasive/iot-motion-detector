@@ -32,9 +32,8 @@ void setup() {
   Serial.println(F("Dimitri Vranken <me@dimitrivranken.com>"));
 
   // Connect to WiFi network
-  // TODO: Reconnect if needed
   Serial.println();
-  if (!wifi_connect(c_wifi_ssid, c_wifi_password)) {
+  if (!ensure_wifi_connected(c_wifi_ssid, c_wifi_password)) {
     shut_down("Failed to connect to WiFi during setup");
   }
 
@@ -69,6 +68,8 @@ void setup() {
 }
 
 void loop() {
+  ensure_wifi_connected();
+
   bool sending_commands_allowed =
     g_motion_last_detected_time == 0 // Do not act until motion has been detected at least once
     || millis() - g_light_last_turned_on_time >= c_light_on_duration; // Do not act while light should still be turned on
@@ -126,10 +127,14 @@ void interrupt_handler_motion_sensor() {
 
 
 /*
- * Tries to connect to the specified wifi network.
+ * Tries to connect to the specified WiFi network, if not already connected.
  * The return value indicates if the connection was successful.
  */
-bool wifi_connect(const char* ssid, const char* password) {
+bool ensure_wifi_connected(const char* ssid, const char* password) {
+  if (WiFi.status() == WL_CONNECTED) {
+    return true;
+  }
+
   Serial.println(F("Connecting to WiFi network"));
   print_name_value("SSID", ssid);
   print_name_value("Password", password);
