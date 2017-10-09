@@ -7,29 +7,31 @@
   Author:       Dimitri Vranken <me@dimitrivranken.com>
 */
 
+
+// ===== Includes =====
 #include <ESP8266WiFi.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 
 // ===== Configuration =====
 const uint32_t c_light_on_duration = 30 * 1000;              // Time to keep the lights on in milliseconds
 
-const char* c_hue_ip = "";                                   // Local IP Address of the Hue Bridge
+const char* c_hue_ip = "TO_BE_SET";                          // Local IP Address of the Hue Bridge
 const uint16_t c_hue_port = 80;                              // Port of the Hue Bridge API
 const uint16_t c_hue_timeout = 10 * 1000;                    // Timeout for requests to the Hue Bridge in milliseconds
-const char* c_hue_user_id = "";                              // ID of the Hue Bridge user for authentication
+const char* c_hue_user_id = "TO_BE_SET";                     // ID of the Hue Bridge user for authentication
 const char* c_hue_light_id = "1";                            // ID of the Hue light to control
 const char* c_hue_command_on = "{\"on\":true, \"bri\":150}"; // Command to turn the Hue light on
 const char* c_hue_command_off = "{\"on\":false}";            // Command to turn the Hue light off
 
-const char* c_wifi_ssid = "";                                // SSID of the WiFi network
-const char* c_wifi_password = "";                            // Password for the Wifi network
+const char* c_wifi_ssid = "TO_BE_SET";                       // SSID of the WiFi network
+const char* c_wifi_password = "TO_BE_SET";                   // Password for the Wifi network
 const uint16_t c_wifi_timeout = 15 * 1000;                   // Timeout for connecting to the WiFi network in milliseconds
 
-// TODO: Implement NTP
 const char* c_ntp_host = "pool.ntp.org";                     // Hostname of the NTP server
-const uint16_t c_ntp_port = 123;                             // Port of the NTP server
-const uint16_t c_ntp_timeout = 15 * 1000;                    // Timeout for requests to the NTP server
-const uint32_t c_ntp_update_interval = 24 * 60 * 60 * 1000;  // Update interval of time synchronisation (not yet implemented)
+const int32_t c_ntp_offset = 0 * 60 * 60 * 1000;             // Offset from the UCT time in milliseconds
+const uint32_t c_ntp_update_interval = 10 * 1000;            // Interval of NTP server synchronisation
 
 const uint32_t c_baud_rate = 115200;                         // Baud rate for serial communication
 const uint8_t c_pin_status_led = LED_BUILTIN;                // Pin number of the status LED
@@ -41,6 +43,9 @@ const bool c_debug = false;                                  // Output debug inf
 // ===== Program =====
 volatile uint32_t g_motion_last_detected_time = 0;
 uint32_t g_light_last_turned_on_time = 0;
+
+WiFiUDP g_ntp_udp;
+NTPClient g_ntp_client(g_ntp_udp, c_ntp_host, c_ntp_offset / 1000, 0);
 uint32_t g_time_last_updated_time = 0;
 
 
@@ -63,8 +68,11 @@ void setup() {
     shut_down("Failed to connect to WiFi during setup");
   }
 
-  // TOOD: Update time
-  //shut_down("Failed to get NTP time during setup");
+  // Update time
+  Serial.println();
+  g_ntp_client.begin();
+  update_ntp_time();
+  g_time_last_updated_time = millis();
 
   // Wait for motion sensor initialization
   Serial.println();
@@ -115,7 +123,7 @@ void loop() {
       // Motion detector wasn't activated recently
       Serial.println();
       Serial.println(F("== Turning light off =="));
-      int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_off);
+      hue_send_command(c_hue_light_id, c_hue_command_off);
     }
   }
   else {
@@ -124,8 +132,10 @@ void loop() {
 
   // Update time
   if (millis() - g_time_last_updated_time >= c_ntp_update_interval) {
+    Serial.println();
     Serial.println(F("== Updating time =="));
 
+    update_ntp_time();
     g_time_last_updated_time = millis();
   }
 
@@ -244,6 +254,17 @@ int8_t hue_send_command(const char* hue_light_id, const char* command) {
   return operation_successful;
 }
 
+void update_ntp_time() {
+  Serial.println(F("Requesting time from NTP server"));
+  print_name_value("NTP Host", c_ntp_host);
+  print_name_value("NTP Offset", String(c_ntp_offset));
+
+  g_ntp_client.forceUpdate();
+
+  Serial.print(F("Current time: "));
+  Serial.println(g_ntp_client.getFormattedTime());
+}
+
 
 // ===== Helpers =====
 /*
@@ -260,6 +281,15 @@ void print_with_duration(const char* text, uint32_t start_time) {
  * Prints a name-value pair.
  */
 void print_name_value(const char* name, const char* value) {
+  Serial.print(name);
+  Serial.print(F(": "));
+  Serial.println(value);
+}
+
+/*
+ * Prints a name-value pair.
+ */
+void print_name_value(const char* name, String value) {
   Serial.print(name);
   Serial.print(F(": "));
   Serial.println(value);

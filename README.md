@@ -71,9 +71,8 @@ wifi_ssid                   | char*    | -                          | SSID of th
 wifi_password               | char*    | -                          | Password for the Wifi network*
 wifi_timeout                | uint16_t | 15 * 1000 (15s)            | Timeout for connecting to the WiFi network in milliseconds
 ntp_host                    | char*    | pool.ntp.org               | Hostname of the NTP server
-ntp_port                    | uint16_t | 123                        | Port of the NTP server
-ntp_timeout                 | uint16_t | 15 * 1000 (15s)            | Timeout for requests to the NTP server
-ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Update interval of time synchronisation (not yet implemented)
+ntp_offset                  | int32_t  | 0                          | Offset from the UCT time in milliseconds
+ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Interval of NTP server synchronisation
 baud_rate                   | uint32_t | 115200                     | Baud rate for serial communication
 pin_status_led              | uint8_t  | [LED_BUILTIN]              | Pin number of the status LED
 pin_motion_sensor           | uint8_t  | 5                          | Pin number of the motion sensor (data pin)
@@ -84,6 +83,7 @@ debug                       | bool     | false                      | Output deb
 
 ### Libraries
 - [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
+- [NTPClient](https://github.com/arduino-libraries/NTPClient)
 
 ### Functionality
 #### Status LED
