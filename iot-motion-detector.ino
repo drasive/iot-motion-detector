@@ -34,7 +34,7 @@ const uint32_t c_ntp_update_interval = 24 * 60 * 60 * 1000;  // Update interval 
 const uint32_t c_baud_rate = 115200;                         // Baud rate for serial communication
 const uint8_t c_pin_status_led = LED_BUILTIN;                // Pin number of the status LED
 const uint8_t c_pin_motion_sensor = 5;                       // Pin number of the motion sensor (data pin)
-const uint32_t motion_sensor_init_duration = 60 * 1000;      // Time until the motion sensor is ready for the first reading in milliseconds
+const uint32_t c_motion_sensor_init_duration = 60 * 1000;    // Time until the motion sensor is ready for the first reading in milliseconds
 const bool c_debug = false;                                  // Output debug information
 
 
@@ -69,7 +69,7 @@ void setup() {
   // Wait for motion sensor initialization
   Serial.println();
   Serial.println("Waiting for motion sensor initialization");
-  while (millis() - boot_time <= c_motion_sensor_initialization_duration) {
+  while (millis() - boot_time <= c_motion_sensor_init_duration) {
     delay(10);
   }
 
@@ -96,18 +96,23 @@ void loop() {
     || millis() - g_light_last_turned_on_time >= c_light_on_duration; // Do not act while light should still be turned on
 
   // Handle detected motion
-  // TODO: Improve program flow clarity
   if (g_motion_last_detected_time != 0 && sending_commands_allowed) {
     if (millis() - g_motion_last_detected_time <= c_light_on_duration) {
       // Motion detector was activated recently
       Serial.println();
       Serial.println(F("== Turning light on =="));
       int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_on);
-      // TODO: Time from interrupt until command completion
-      g_light_last_turned_on_time = millis();
+
+      if (command_status == 1) {
+        g_light_last_turned_on_time = millis();
+      }
+
+      Serial.print(F("Response time: "));
+      Serial.print(millis() - g_motion_last_detected_time);
+      Serial.println(F(" ms"));
     }
     else {
-      // Motion detector wasn't activated recently and light is not off
+      // Motion detector wasn't activated recently
       Serial.println();
       Serial.println(F("== Turning light off =="));
       int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_off);
@@ -123,6 +128,8 @@ void loop() {
 
     g_time_last_updated_time = millis();
   }
+
+  delay(10);
 }
 
 void interrupt_handler_motion_sensor() {
