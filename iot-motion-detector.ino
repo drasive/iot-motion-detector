@@ -1,5 +1,5 @@
 /*
-  IoT Motion Detector v0.1
+  IoT Motion Detector v0.2
   A $6 internet of things and easy to build motion detector.
 
   See iot-motion-detector_implementation.ino for implementation.
