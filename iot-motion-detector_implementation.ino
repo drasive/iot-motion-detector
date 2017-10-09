@@ -40,7 +40,7 @@ void setup() {
   // Update time
   Serial.println();
   g_ntp_client.begin();
-  update_ntp_time();
+  update_ntp_time(c_ntp_host, c_ntp_offset);
   g_time_last_updated_time = millis();
 
   // Wait for motion sensor initialization
@@ -68,19 +68,23 @@ void setup() {
 }
 
 void loop() {
+  // Ensure WiFi connection
   ensure_wifi_connected(c_wifi_ssid, c_wifi_password);
 
+  // Handle detected motion
   bool sending_commands_allowed =
     g_motion_last_detected_time == 0 // Do not act until motion has been detected at least once
     || millis() - g_light_last_turned_on_time >= c_light_on_duration; // Do not act while light should still be turned on
 
-  // Handle detected motion
   if (g_motion_last_detected_time != 0 && sending_commands_allowed) {
     if (millis() - g_motion_last_detected_time <= c_light_on_duration) {
       // Motion detector was activated recently
       Serial.println();
       Serial.println(F("== Turning light on =="));
-      int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_on);
+
+      int8_t command_status = is_daytime(g_ntp_client.getHours(), g_ntp_client.getMinutes(), c_nighttime_start, c_nighttime_duration)
+        ? hue_send_command(c_hue_light_id, c_hue_command_on_daytime)
+        : hue_send_command(c_hue_light_id, c_hue_command_on_nighttime);
 
       if (command_status == 1) {
         g_light_last_turned_on_time = millis();
@@ -106,7 +110,7 @@ void loop() {
     Serial.println();
     Serial.println(F("== Updating time =="));
 
-    update_ntp_time();
+    update_ntp_time(c_ntp_host, c_ntp_offset);
     g_time_last_updated_time = millis();
   }
 
@@ -229,10 +233,13 @@ int8_t hue_send_command(const char* hue_light_id, const char* command) {
   return operation_successful;
 }
 
-void update_ntp_time() {
+/*
+ * Synchronizes the system clock with an NTP server.
+ */
+void update_ntp_time(const char* ntp_host, const int32_t ntp_offset) {
   Serial.println(F("Requesting time from NTP server"));
-  print_name_value("NTP Host", c_ntp_host);
-  print_name_value("NTP Offset", String(c_ntp_offset));
+  print_name_value("NTP Host", ntp_host);
+  print_name_value("NTP Offset", String(ntp_offset));
 
   uint32_t request_sent_time = millis();
   g_ntp_client.forceUpdate();
@@ -245,9 +252,28 @@ void update_ntp_time() {
 
 // ===== Helpers =====
 /*
+ * Returns true if the specified time lies outside of the specified nighttime; false otherwise.
+ */
+bool is_daytime(
+  const uint8_t current_hour, const uint8_t current_minute,
+  const uint16_t nighttime_start, const uint16_t nighttime_duration) {
+    uint16_t current_minutes = (current_hour * 60) + current_minute;
+    uint16_t nighttime_end = (nighttime_start + nighttime_duration) % (24 * 60);
+    
+    if (nighttime_end < nighttime_start) {
+      // Nighttime crosses over midnight
+      return current_minutes < nighttime_start && current_minutes >= nighttime_end;
+    }
+    
+    // Nighttime doesn't cross over midnight
+    return current_minutes < nighttime_start || current_minutes >= nighttime_end;
+}
+
+
+/*
  * Prints a text with the time elapsed since the specified start time.
  */
-void print_with_duration(const char* text, uint32_t start_time) {
+void print_with_duration(const char* text, const uint32_t start_time) {
   Serial.print(text);
   Serial.print(F(" ("));
   Serial.print(millis() - start_time);

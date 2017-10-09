@@ -33,6 +33,7 @@ Component | State          | Power Draw (mA)
 ----------|----------------|----------------
 ESP8266   | Modem-Sleep(³) | 15
 HC-SR501  | On             |  0.065
+
 Total: 15.065mA
 
 #### Active
@@ -42,6 +43,7 @@ Component | State         | Power Draw (mA)
 ----------|---------------|----------------
 ESP8266   | Tx 802.11b(³) | 170
 HC-SR501  | On            |   0.065
+
 Total: 170.065mA
 
 ### Using Different Hardware
@@ -58,14 +60,17 @@ Motion sensor other than HC-SR501:
 ## Software
 ### Configuration
 Name                        | Type     | Default Value              | Description
---------------------------------------|----------|----------------------------|------------
+----------------------------|----------|----------------------------|------------
 light_on_duration           | uint32_t | 60 * 1000 (60s)            | Time to keep the lights on in milliseconds
+nighttime_start             | uint16_t | 23 * 60 (23:00)            | Start of nighttime in minutes since midnight
+nighttime_duration          | uint16_t | 7 * 60 (07:00)             | Duration of nighttime in minutes
 hue_ip                      | char*    | -                          | Local IP Address of the Hue Bridge
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
 hue_user_id                 | char*    | -                          | ID of the Hue Bridge user for authentication*
 hue_light_id                | char*    | -                          | ID of the Hue light to control
-hue_command_on              | char*    | {\"on\":true, \"bri\":150} | Command to turn the Hue light on
+hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":150} | Command to turn the Hue light on during daytime
+hue_command_on_nighttime    | char*    | {\"on\":true, \"bri\":1}   | Command to turn the Hue light on during nighttime
 hue_command_off             | char*    | {\"on\":false}             | Command to turn the Hue light off
 wifi_ssid                   | char*    | -                          | SSID of the WiFi network*
 wifi_password               | char*    | -                          | Password for the Wifi network*
