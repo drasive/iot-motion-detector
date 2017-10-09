@@ -8,7 +8,7 @@ This implementation controls a Philips Hue light, but any IoT application can be
 Name                                 | Type            | Price (USD) | Link
 -------------------------------------|-----------------|-------------|-----
 WeMos D1 mini V2.2.0 (ESP8266 board) | Microcontroller | 4.09        | [banggood.com](https://www.banggood.com/WeMos-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html)
-HC-SR501                             | Motion detector | 1.95        | [banggood.com(https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html)
+HC-SR501                             | Motion detector | 1.95        | [banggood.com](https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html)
 
 Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 
@@ -141,8 +141,8 @@ Shipping prices and durations were calculated for Switzerland.
 #### Motion detector
 Selection criteria:
 * <= 5$ cost (including shipping and microcontroller integration)
-* >= 2m range
-* >= 60 degrees horizontal sensing range
+* &gt;= 2m range
+* &gt;= 60 degrees horizontal sensing range
 * <= 1s detection delay
 * <= 4 weeks shipping time
 * Easy to use with microcontroller (documentation/tutorials)
