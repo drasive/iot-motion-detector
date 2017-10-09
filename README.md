@@ -8,7 +8,7 @@ This implementation controls a Philips Hue light, but any IoT application can be
 Name                                 | Type            | Price (USD) | Link
 -------------------------------------|-----------------|-------------|-----
 WeMos D1 mini V2.2.0 (ESP8266 board) | Microcontroller | 4.09        | [banggood.com](https://www.banggood.com/WeMos-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html)
-HC-SR501                             | Motion detector | 1.95        | [banggood.com(https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html)
+HC-SR501                             | Motion detector | 1.95        | [banggood.com](https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html)
 
 Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 
@@ -33,6 +33,7 @@ Component | State          | Power Draw (mA)
 ----------|----------------|----------------
 ESP8266   | Modem-Sleep(³) | 15
 HC-SR501  | On             |  0.065
+
 Total: 15.065mA
 
 #### Active
@@ -42,6 +43,7 @@ Component | State         | Power Draw (mA)
 ----------|---------------|----------------
 ESP8266   | Tx 802.11b(³) | 170
 HC-SR501  | On            |   0.065
+
 Total: 170.065mA
 
 ### Using Different Hardware
@@ -58,23 +60,24 @@ Motion sensor other than HC-SR501:
 ## Software
 ### Configuration
 Name                        | Type     | Default Value              | Description
---------------------------------------|----------|----------------------------|------------
+----------------------------|----------|----------------------------|------------
 light_on_duration           | uint32_t | 60 * 1000 (60s)            | Time to keep the lights on in milliseconds
-light_update_interval       | uint32_t | 60 * 1000 (60s)            | Update interval of reading the light state
+nighttime_start             | uint16_t | 23 * 60 (23:00)            | Start of nighttime in minutes since midnight
+nighttime_duration          | uint16_t | 7 * 60 (07:00)             | Duration of nighttime in minutes
 hue_ip                      | char*    | -                          | Local IP Address of the Hue Bridge
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
 hue_user_id                 | char*    | -                          | ID of the Hue Bridge user for authentication*
 hue_light_id                | char*    | -                          | ID of the Hue light to control
-hue_command_on              | char*    | {\"on\":true, \"bri\":150} | Command to turn the Hue light on
+hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":254} | Command to turn the Hue light on during daytime
+hue_command_on_nighttime    | char*    | {\"on\":true, \"bri\":1}   | Command to turn the Hue light on during nighttime
 hue_command_off             | char*    | {\"on\":false}             | Command to turn the Hue light off
 wifi_ssid                   | char*    | -                          | SSID of the WiFi network*
 wifi_password               | char*    | -                          | Password for the Wifi network*
 wifi_timeout                | uint16_t | 15 * 1000 (15s)            | Timeout for connecting to the WiFi network in milliseconds
 ntp_host                    | char*    | pool.ntp.org               | Hostname of the NTP server
-ntp_port                    | uint16_t | 123                        | Port of the NTP server
-ntp_timeout                 | uint16_t | 15 * 1000 (15s)            | Timeout for requests to the NTP server
-ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Update interval of time synchronisation (not yet implemented)
+ntp_offset                  | int32_t  | 0                          | Offset from the UTC time in milliseconds
+ntp_update_interval         | uint32_t | 24 * 60 * 60 * 1000 (24h)  | Interval of system clock synchronisation with NTP server
 baud_rate                   | uint32_t | 115200                     | Baud rate for serial communication
 pin_status_led              | uint8_t  | [LED_BUILTIN]              | Pin number of the status LED
 pin_motion_sensor           | uint8_t  | 5                          | Pin number of the motion sensor (data pin)
@@ -85,6 +88,7 @@ debug                       | bool     | false                      | Output deb
 
 ### Libraries
 - [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
+- [NTPClient](https://github.com/arduino-libraries/NTPClient)
 
 ### Functionality
 #### Status LED
@@ -96,7 +100,7 @@ The following states are communicated using the onboard LED:
 
 #### Initialization
 After powering on the device gets everything ready for operation. 
-This includes connecting to the WiFi network, reading the current light status and waiting for the motion sensor initialization.
+This includes connecting to the WiFi network and waiting for the motion sensor initialization.
 If any of these operations fail, shutdown is initiated. The shutdown reason is logged to the serial bus.
 The amount of time required for initialization is usually bound by the configuration value of "motion_sensor_init_duration".
 
@@ -104,17 +108,20 @@ The amount of time required for initialization is usually bound by the configura
 The device reduces power usage to a minimum. A power cycle is required to restart.
 A shutdown can only occur during initialization (see section "Initialization").
 
-#### Turning light on
+#### Turning Light on
 When motion is detected the light is turned on.
 
-#### Turning light off
+#### Turning Light off
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
 When motion is detected again while the light is still on the timer is reset.
 
-#### Polling light status
-As external factors can influence the state of the light (e.g. control with the Philips Hue app) is is polled periodically (configuration value "light_update_interval").
-The polling is paused while the status of the light does not need to be known.
-This request is blocking and can delay turning on/off the light (configuration value "hue_timeout").
+### Daytime/Nighttime
+Different on-commands can be defined for daytime/nighttime (configuration values "hue_command_on_daytime" and "hue_command_on_nighttime").
+When and how long nighttime is can be configured as well (configuration values "nighttime_start" and "nighttime_duration").
+
+### NTP Time Synchronization
+The device periodically (configuration value "ntp_update_interval") updates its internal clock with an NTP server (configuration value "ntp_host").
+This is a blocking operation and can slightly delay turning the light on/off.
 
 #### Serial Bus
 Information about interrupts, actions and requests are logged to the serial interface (USB port).
@@ -127,8 +134,6 @@ Flash Size: 4M (3M SPIFFS)
 Upload Speed: 57600
 
 ### Improvement Ideas
-- Support for different action during daytime/nighttime. Requires knowledge of wall clock (NTP).
-- Support for reconnecting to WiFi network if needed
 - Support for OTA updating of configuration values
 
 
@@ -141,8 +146,8 @@ Shipping prices and durations were calculated for Switzerland.
 #### Motion detector
 Selection criteria:
 * <= 5$ cost (including shipping and microcontroller integration)
-* >= 2m range
-* >= 60 degrees horizontal sensing range
+* &gt;= 2m range
+* &gt;= 60 degrees horizontal sensing range
 * <= 1s detection delay
 * <= 4 weeks shipping time
 * Easy to use with microcontroller (documentation/tutorials)
