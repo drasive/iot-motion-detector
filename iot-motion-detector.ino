@@ -12,7 +12,6 @@
 
 // ===== Configuration =====
 const uint32_t c_light_on_duration = 30 * 1000;              // Time to keep the lights on in milliseconds
-const uint32_t c_light_update_interval = 5 * 60 * 1000;      // Update interval of reading the light state
 
 const char* c_hue_ip = "";                                   // Local IP Address of the Hue Bridge
 const uint16_t c_hue_port = 80;                              // Port of the Hue Bridge API
@@ -41,11 +40,7 @@ const bool c_debug = false;                                  // Output debug inf
 
 // ===== Program =====
 volatile uint32_t g_last_motion_detected_time = 0;
-
-int8_t g_light_status = -1; // 1: On, 0: Off, -1: Unknown
-uint32_t g_light_status_last_update_time = 0;
 uint32_t g_light_last_turned_on_time = 0;
-
 uint32_t g_time_last_update_time = 0;
 
 
@@ -66,14 +61,6 @@ void setup() {
   Serial.println();
   if (!wifi_connect(c_wifi_ssid, c_wifi_password)) {
     shut_down("Failed to connect to WiFi during setup");
-  }
-
-  // Update light status
-  Serial.println();
-  g_light_status = hue_is_light_on(c_hue_light_id);
-  g_light_status_last_update_time = millis();
-  if (g_light_status == -1) {
-    shut_down("Failed to get light status during setup");
   }
 
   // TOOD: Update time
@@ -112,53 +99,22 @@ void loop() {
   // TODO: Improve program flow clarity
   if (g_last_motion_detected_time != 0 && sending_commands_allowed) {
     if (millis() - g_last_motion_detected_time <= c_light_on_duration) {
-      // Motion detector was activated recently 
-      if (g_light_status != 1) {
-        Serial.println();
-        Serial.println(F("== Turning light on =="));
-        int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_on);
-        // TODO: Time from interrupt until command completion
-        g_light_last_turned_on_time = millis();
-
-        if (command_status == 1) {
-          g_light_status = 1;
-        }
-        else {
-          g_light_status = -1;
-        }
-        g_light_status_last_update_time = millis();
-      }
-      else {
-        // Light is already on, do nothing
-      }
+      // Motion detector was activated recently
+      Serial.println();
+      Serial.println(F("== Turning light on =="));
+      int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_on);
+      // TODO: Time from interrupt until command completion
+      g_light_last_turned_on_time = millis();
     }
-    else if (g_light_status != 0) {
+    else {
       // Motion detector wasn't activated recently and light is not off
       Serial.println();
       Serial.println(F("== Turning light off =="));
       int8_t command_status = hue_send_command(c_hue_light_id, c_hue_command_off);
-
-      if (command_status == 1) {
-        g_light_status = 0;
-      }
-      else {
-        g_light_status = -1;
-      }
-      g_light_status_last_update_time = millis();
     }
   }
   else {
     // Sending commands is suspended
-  }
-
-  // Update light status
-  if (sending_commands_allowed
-      && millis() - g_light_status_last_update_time >= c_light_update_interval) {
-    Serial.println();
-    Serial.println(F("== Updating light status =="));
-
-    g_light_status = hue_is_light_on(c_hue_light_id);
-    g_light_status_last_update_time = millis();
   }
 
   // Update time
@@ -207,71 +163,6 @@ bool wifi_connect(const char* ssid, const char* password) {
   print_name_value("IP address", ip_address);
 
   return true;
-}
-
-/*
- * Checks if a Hue light is turned on.
- * 
- * Return values
- *  1: Light is turned on
- *  0: Light is turned off
- * -1: Failed to get light status
- */
-int8_t hue_is_light_on(const char* hue_light_id) {
-  Serial.println(F("Getting status of Hue light"));
-  print_name_value("Light ID", hue_light_id);
-
-  // Connect to Hue Bridge
-  WiFiClient client;
-  uint32_t connection_start_time = millis();
-  if (!client.connect(c_hue_ip, c_hue_port)) {
-    print_with_duration("Connecting to Hue Bridge failed", connection_start_time);
-    return -1;
-  }
-  print_with_duration("Connecting to Hue Bridge successful", connection_start_time);
-
-  // Send request
-  client.println("GET /api/" + String(c_hue_user_id) + "/lights/" + String(hue_light_id) + " HTTP/1.1");
-  client.println("Host: " + String(c_hue_ip) + ":" + String(c_hue_port));
-  client.println("Connection: close");
-
-  // Wait for response
-  uint32_t request_sent_time = millis();
-  while (client.available() == 0) {
-    if (millis() - request_sent_time > c_hue_timeout) {
-      print_with_duration("Response from Hue Bridge not received", request_sent_time);
-      client.stop();
-      return -1;
-    }
-
-    delay(10);
-  }
-  // TODO: Full timeout is always used
-  print_with_duration("Response from Hue Bridge received", request_sent_time);
-
-  // Parse response
-  int8_t light_on = 0;
-  while(client.available()) {
-    String line = client.readStringUntil('\r');
-    if (c_debug) {
-      Serial.print(line);
-    }
-
-    if (line.indexOf("\"on\":true") != -1) {
-      light_on = 1;
-      break;
-    }
-  }
-  if (c_debug) {
-    Serial.println();
-  }
-
-  // Close connection
-  client.stop();
-  Serial.print(F("Light status: "));
-  Serial.println(light_on ? F("On") : F("Off"));
-
-  return light_on;
 }
 
 /* 

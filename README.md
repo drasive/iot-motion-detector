@@ -60,7 +60,6 @@ Motion sensor other than HC-SR501:
 Name                        | Type     | Default Value              | Description
 --------------------------------------|----------|----------------------------|------------
 light_on_duration           | uint32_t | 60 * 1000 (60s)            | Time to keep the lights on in milliseconds
-light_update_interval       | uint32_t | 60 * 1000 (60s)            | Update interval of reading the light state
 hue_ip                      | char*    | -                          | Local IP Address of the Hue Bridge
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
@@ -96,7 +95,7 @@ The following states are communicated using the onboard LED:
 
 #### Initialization
 After powering on the device gets everything ready for operation. 
-This includes connecting to the WiFi network, reading the current light status and waiting for the motion sensor initialization.
+This includes connecting to the WiFi network and waiting for the motion sensor initialization.
 If any of these operations fail, shutdown is initiated. The shutdown reason is logged to the serial bus.
 The amount of time required for initialization is usually bound by the configuration value of "motion_sensor_init_duration".
 
@@ -110,11 +109,6 @@ When motion is detected the light is turned on.
 #### Turning light off
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
 When motion is detected again while the light is still on the timer is reset.
-
-#### Polling light status
-As external factors can influence the state of the light (e.g. control with the Philips Hue app) is is polled periodically (configuration value "light_update_interval").
-The polling is paused while the status of the light does not need to be known.
-This request is blocking and can delay turning on/off the light (configuration value "hue_timeout").
 
 #### Serial Bus
 Information about interrupts, actions and requests are logged to the serial interface (USB port).
