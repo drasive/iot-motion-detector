@@ -115,11 +115,12 @@ When motion is detected the light is turned on.
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
 When motion is detected again while the light is still on the timer is reset.
 
-### Daytime/Nighttime
+#### Daytime/Nighttime
 Different on-commands can be defined for daytime/nighttime (configuration values "hue_command_on_daytime" and "hue_command_on_nighttime").
-When and how long nighttime is can be configured as well (configuration values "nighttime_start" and "nighttime_duration").
+When and how long nighttime is can be configured (configuration values "nighttime_start" and "nighttime_duration").
+The light state will not update if it is on during a datime/nighttime switch.
 
-### NTP Time Synchronization
+#### NTP Time Synchronization
 The device periodically (configuration value "ntp_update_interval") updates its internal clock with an NTP server (configuration value "ntp_host").
 This is a blocking operation and can slightly delay turning the light on/off.
 
