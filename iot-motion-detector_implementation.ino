@@ -83,8 +83,8 @@ void loop() {
       Serial.println(F("== Turning light on =="));
 
       int8_t command_status = is_daytime(g_ntp_client.getHours(), g_ntp_client.getMinutes(), c_nighttime_start, c_nighttime_duration)
-        ? hue_send_command(c_hue_light_id, c_hue_command_on_daytime)
-        : hue_send_command(c_hue_light_id, c_hue_command_on_nighttime);
+        ? hue_send_command(c_hue_light_identifier, c_hue_command_on_daytime)
+        : hue_send_command(c_hue_light_identifier, c_hue_command_on_nighttime);
 
       if (command_status == 1) {
         g_light_last_turned_on_time = millis();
@@ -98,7 +98,7 @@ void loop() {
       // Motion detector wasn't activated recently
       Serial.println();
       Serial.println(F("== Turning light off =="));
-      hue_send_command(c_hue_light_id, c_hue_command_off);
+      hue_send_command(c_hue_light_identifier, c_hue_command_off);
     }
   }
   else {
@@ -169,9 +169,9 @@ bool ensure_wifi_connected(const char* ssid, const char* password) {
  *  0: Operation not successful
  * -1: Failed to execute operation
  */
-int8_t hue_send_command(const char* hue_light_id, const char* command) {
+int8_t hue_send_command(const char* hue_light_identifier, const char* command) {
   Serial.println(F("Sending command to Hue light"));
-  print_name_value("Light ID", hue_light_id);
+  print_name_value("Light identifier", hue_light_identifier);
   print_name_value("Command", command);
 
   // Connect to Hue Bridge
@@ -184,7 +184,7 @@ int8_t hue_send_command(const char* hue_light_id, const char* command) {
   print_with_duration("Connecting to Hue Bridge successful", connection_start_time);
 
   // Send request
-  client.println("PUT /api/" + String(c_hue_user_id) + "/lights/" + String(hue_light_id) + "/state");
+  client.println("PUT /api/" + String(c_hue_user_id) + "/" + String(hue_light_identifier) + "/state");
   client.println("Host: " + String(c_hue_ip) + ":" + String(c_hue_port));
   client.println("User-Agent: ESP8266/1.0");
   client.println("Connection: keep-alive");
