@@ -23,26 +23,29 @@ Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 ### Wiring
 ![Wiring Plan](/wiring/iot-motion-detector.png)
 
+### HC-SR501 configuration
+See http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/.
+
 ### Power Consumption
 The values in this section are calculated, I do not have the required hardware to make measurements.
 
 #### Standby
 Sensing for motion, not sending/receiving over WiFi.
 
-Component | State          | Power Draw (mA)
-----------|----------------|----------------
-ESP8266   | Modem-Sleep(³) | 15
-HC-SR501  | On             |  0.065
+Component | State           | Power Draw (mA)
+----------|-----------------|----------------
+ESP8266   | Modem-Sleep [4] | 15
+HC-SR501  | On              |  0.065
 
 Total: 15.065mA
 
 #### Active
 Sensing for motion, sending/receiving over WiFi.
 
-Component | State         | Power Draw (mA)
-----------|---------------|----------------
-ESP8266   | Tx 802.11b(³) | 170
-HC-SR501  | On            |   0.065
+Component | State          | Power Draw (mA)
+----------|----------------|----------------
+ESP8266   | Tx 802.11b [4] | 170
+HC-SR501  | On             |   0.065
 
 Total: 170.065mA
 
@@ -191,9 +194,9 @@ The HC-SR501 initially fired a lot of false positives. Putting a 10k Ohm resisto
 1. Similar project: https://www.reddit.com/r/esp8266/comments/5l94gl/motion_control_hue_lights_with_esp8266_and_pir/
 
 1. ESP8266 programming: https://hackaday.com/2015/03/18/how-to-directly-program-an-inexpensive-esp8266-wifi-module/
+1. ESP8266 programming with Arduino IDE: https://arduino-esp8266.readthedocs.io/en/latest/installing.html#instructions
 1. ESP8266 power consumption: http://bbs.espressif.com/viewtopic.php?t=133
 1. ESP8266 power saving: https://github.com/esp8266/Arduino/issues/1381
-1. ESP8266 programming with Arduino IDE: https://arduino-esp8266.readthedocs.io/en/latest/installing.html#instructions
 
 1. HC-SR501 configuration: http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/
 
