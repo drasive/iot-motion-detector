@@ -21,7 +21,7 @@ Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 * Computer (ESP8266 programming)
 
 ### Wiring
-[TODO]
+![Wiring Plan](/wiring/iot-motion-detector.png)
 
 ### Power Consumption
 The values in this section are calculated, I do not have the required hardware to make measurements.
