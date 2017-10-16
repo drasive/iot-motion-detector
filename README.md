@@ -188,7 +188,7 @@ The ESP8266 is powered by a micro USB cable. This enables the use of a USB power
 The HC-SR501 is powered directly with 5V by the ESP8266.
 
 ### HC-SR501 False Positives
-The HC-SR501 initially fired a lot of false positives. Putting a 10k Ohm resistor in the data line seems to have solved this problem (see section "Wiring").
+The HC-SR501 initially fired a lot of false positives. Putting a 15k Ohm resistor in the data line seems to have solved this problem (see section "Wiring").
 
 
 ## References
