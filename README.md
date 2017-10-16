@@ -72,7 +72,7 @@ hue_ip                      | char*    | -                          | Local IP A
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
 hue_user_id                 | char*    | -                          | ID of the Hue Bridge user for authentication*
-motion_detected_yet         | char*    | lights/1                   | Identifier of the Hue light/lightgroup to control
+hue_light_identifier        | char*    | lights/1                   | Identifier of the Hue light/lightgroup to control
 hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":254} | Command to turn the Hue light on during daytime
 hue_command_on_nighttime    | char*    | {\"on\":true, \"bri\":1}   | Command to turn the Hue light on during nighttime
 hue_command_off             | char*    | {\"on\":false}             | Command to turn the Hue light off
