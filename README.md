@@ -25,6 +25,7 @@ Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 
 ### HC-SR501 configuration
 See http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/.
+It is recommended to set the time delay to the minimum as the software handles delays itself.
 
 ### Power Consumption
 The values in this section are calculated, I do not have the required hardware to make measurements.
@@ -71,7 +72,7 @@ hue_ip                      | char*    | -                          | Local IP A
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
 hue_user_id                 | char*    | -                          | ID of the Hue Bridge user for authentication*
-hue_light_id                | char*    | -                          | ID of the Hue light to control
+motion_detected_yet         | char*    | lights/1                   | Identifier of the Hue light/lightgroup to control
 hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":254} | Command to turn the Hue light on during daytime
 hue_command_on_nighttime    | char*    | {\"on\":true, \"bri\":1}   | Command to turn the Hue light on during nighttime
 hue_command_off             | char*    | {\"on\":false}             | Command to turn the Hue light off
