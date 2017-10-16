@@ -21,7 +21,11 @@ Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 * Computer (ESP8266 programming)
 
 ### Wiring
-[TODO]
+![Wiring Plan](/wiring/iot-motion-detector.png)
+
+### HC-SR501 configuration
+See http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/.
+It is recommended to set the time delay to the minimum as the software handles delays itself.
 
 ### Power Consumption
 The values in this section are calculated, I do not have the required hardware to make measurements.
@@ -29,20 +33,20 @@ The values in this section are calculated, I do not have the required hardware t
 #### Standby
 Sensing for motion, not sending/receiving over WiFi.
 
-Component | State          | Power Draw (mA)
-----------|----------------|----------------
-ESP8266   | Modem-Sleep(³) | 15
-HC-SR501  | On             |  0.065
+Component | State           | Power Draw (mA)
+----------|-----------------|----------------
+ESP8266   | Modem-Sleep [4] | 15
+HC-SR501  | On              |  0.065
 
 Total: 15.065mA
 
 #### Active
 Sensing for motion, sending/receiving over WiFi.
 
-Component | State         | Power Draw (mA)
-----------|---------------|----------------
-ESP8266   | Tx 802.11b(³) | 170
-HC-SR501  | On            |   0.065
+Component | State          | Power Draw (mA)
+----------|----------------|----------------
+ESP8266   | Tx 802.11b [4] | 170
+HC-SR501  | On             |   0.065
 
 Total: 170.065mA
 
@@ -63,12 +67,12 @@ Name                        | Type     | Default Value              | Descriptio
 ----------------------------|----------|----------------------------|------------
 light_on_duration           | uint32_t | 60 * 1000 (60s)            | Time to keep the lights on in milliseconds
 nighttime_start             | uint16_t | 23 * 60 (23:00)            | Start of nighttime in minutes since midnight
-nighttime_duration          | uint16_t | 7 * 60 (07:00)             | Duration of nighttime in minutes
+nighttime_duration          | uint16_t | 7 * 60 (06:00)             | Duration of nighttime in minutes
 hue_ip                      | char*    | -                          | Local IP Address of the Hue Bridge
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
 hue_user_id                 | char*    | -                          | ID of the Hue Bridge user for authentication*
-hue_light_id                | char*    | -                          | ID of the Hue light to control
+motion_detected_yet         | char*    | lights/1                   | Identifier of the Hue light/lightgroup to control
 hue_command_on_daytime      | char*    | {\"on\":true, \"bri\":254} | Command to turn the Hue light on during daytime
 hue_command_on_nighttime    | char*    | {\"on\":true, \"bri\":1}   | Command to turn the Hue light on during nighttime
 hue_command_off             | char*    | {\"on\":false}             | Command to turn the Hue light off
@@ -115,11 +119,12 @@ When motion is detected the light is turned on.
 When motion is not detected for the specified amount of time (configuration value "light_on_duration") the light is turned off.
 When motion is detected again while the light is still on the timer is reset.
 
-### Daytime/Nighttime
+#### Daytime/Nighttime
 Different on-commands can be defined for daytime/nighttime (configuration values "hue_command_on_daytime" and "hue_command_on_nighttime").
-When and how long nighttime is can be configured as well (configuration values "nighttime_start" and "nighttime_duration").
+When and how long nighttime is can be configured (configuration values "nighttime_start" and "nighttime_duration").
+The light state will not update if it is on during a datime/nighttime switch.
 
-### NTP Time Synchronization
+#### NTP Time Synchronization
 The device periodically (configuration value "ntp_update_interval") updates its internal clock with an NTP server (configuration value "ntp_host").
 This is a blocking operation and can slightly delay turning the light on/off.
 
@@ -183,16 +188,16 @@ The ESP8266 is powered by a micro USB cable. This enables the use of a USB power
 The HC-SR501 is powered directly with 5V by the ESP8266.
 
 ### HC-SR501 False Positives
-The HC-SR501 initially fired a lot of false positives. Putting a 10k Ohm resistor in the data line seems to have solved this problem (see section "Wiring").
+The HC-SR501 initially fired a lot of false positives. Putting a 15k Ohm resistor in the data line seems to have solved this problem (see section "Wiring").
 
 
 ## References
 1. Similar project: https://www.reddit.com/r/esp8266/comments/5l94gl/motion_control_hue_lights_with_esp8266_and_pir/
 
 1. ESP8266 programming: https://hackaday.com/2015/03/18/how-to-directly-program-an-inexpensive-esp8266-wifi-module/
+1. ESP8266 programming with Arduino IDE: https://arduino-esp8266.readthedocs.io/en/latest/installing.html#instructions
 1. ESP8266 power consumption: http://bbs.espressif.com/viewtopic.php?t=133
 1. ESP8266 power saving: https://github.com/esp8266/Arduino/issues/1381
-1. ESP8266 programming with Arduino IDE: https://arduino-esp8266.readthedocs.io/en/latest/installing.html#instructions
 
 1. HC-SR501 configuration: http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/
 

@@ -1,5 +1,5 @@
 /*
-  IoT Motion Detector v0.2
+  IoT Motion Detector v1.0
   A $6 internet of things and easy to build motion detector.
 
   See iot-motion-detector.ino for configuration.
@@ -13,6 +13,7 @@
 // ===== Program =====
 volatile uint32_t g_motion_last_detected_time = 0;
 uint32_t g_light_last_turned_on_time = 0;
+bool g_light_is_on = false;
 
 WiFiUDP g_ntp_udp;
 NTPClient g_ntp_client(g_ntp_udp, c_ntp_host, c_ntp_offset / 1000, 0);
@@ -27,7 +28,7 @@ void setup() {
 
   Serial.begin(c_baud_rate);
   Serial.println();
-  Serial.println(F("===== IoT Motion Detector v0.2 ====="));
+  Serial.println(F("===== IoT Motion Detector v1.0 ====="));
   Serial.println(F("https://github.com/drasive/iot-motion-detector"));
   Serial.println(F("Dimitri Vranken <me@dimitrivranken.com>"));
 
@@ -72,37 +73,36 @@ void loop() {
   ensure_wifi_connected(c_wifi_ssid, c_wifi_password);
 
   // Handle detected motion
-  bool sending_commands_allowed =
-    g_motion_last_detected_time == 0 // Do not act until motion has been detected at least once
-    || millis() - g_light_last_turned_on_time >= c_light_on_duration; // Do not act while light should still be turned on
+  bool motion_detected_yet = g_motion_last_detected_time != 0;
+  bool motion_detected_recently = motion_detected_yet && millis() - g_motion_last_detected_time <= c_light_on_duration;
+    
+  if (motion_detected_yet && motion_detected_recently && !g_light_is_on) {
+    // Motion was detected recently and light is off
+    Serial.println();
+    Serial.println(F("== Turning light on =="));
 
-  if (g_motion_last_detected_time != 0 && sending_commands_allowed) {
-    if (millis() - g_motion_last_detected_time <= c_light_on_duration) {
-      // Motion detector was activated recently
-      Serial.println();
-      Serial.println(F("== Turning light on =="));
+    int8_t command_status = is_daytime(g_ntp_client.getHours(), g_ntp_client.getMinutes(), c_nighttime_start, c_nighttime_duration)
+      ? hue_send_command(c_hue_light_identifier, c_hue_command_on_daytime)
+      : hue_send_command(c_hue_light_identifier, c_hue_command_on_nighttime);
 
-      int8_t command_status = is_daytime(g_ntp_client.getHours(), g_ntp_client.getMinutes(), c_nighttime_start, c_nighttime_duration)
-        ? hue_send_command(c_hue_light_id, c_hue_command_on_daytime)
-        : hue_send_command(c_hue_light_id, c_hue_command_on_nighttime);
+    if (command_status == 1) {
+      g_light_is_on = true;
+      g_light_last_turned_on_time = millis();
 
-      if (command_status == 1) {
-        g_light_last_turned_on_time = millis();
-
-        Serial.print(F("Response time: "));
-        Serial.print(millis() - g_motion_last_detected_time);
-        Serial.println(F(" ms"));
-      }
-    }
-    else {
-      // Motion detector wasn't activated recently
-      Serial.println();
-      Serial.println(F("== Turning light off =="));
-      hue_send_command(c_hue_light_id, c_hue_command_off);
+      Serial.print(F("Response time: "));
+      Serial.print(millis() - g_motion_last_detected_time);
+      Serial.println(F(" ms"));
     }
   }
-  else {
-    // Sending commands is suspended
+  else if (motion_detected_yet && !motion_detected_recently && g_light_is_on) {
+    // Motion was NOT detected recently and light is on
+    Serial.println();
+    Serial.println(F("== Turning light off =="));
+    int8_t command_status = hue_send_command(c_hue_light_identifier, c_hue_command_off);
+
+    if (command_status == 1) {
+      g_light_is_on = false;
+    }
   }
 
   // Update time
@@ -169,9 +169,9 @@ bool ensure_wifi_connected(const char* ssid, const char* password) {
  *  0: Operation not successful
  * -1: Failed to execute operation
  */
-int8_t hue_send_command(const char* hue_light_id, const char* command) {
+int8_t hue_send_command(const char* hue_light_identifier, const char* command) {
   Serial.println(F("Sending command to Hue light"));
-  print_name_value("Light ID", hue_light_id);
+  print_name_value("Light identifier", hue_light_identifier);
   print_name_value("Command", command);
 
   // Connect to Hue Bridge
@@ -184,7 +184,7 @@ int8_t hue_send_command(const char* hue_light_id, const char* command) {
   print_with_duration("Connecting to Hue Bridge successful", connection_start_time);
 
   // Send request
-  client.println("PUT /api/" + String(c_hue_user_id) + "/lights/" + String(hue_light_id) + "/state");
+  client.println("PUT /api/" + String(c_hue_user_id) + "/" + String(hue_light_identifier) + "/state");
   client.println("Host: " + String(c_hue_ip) + ":" + String(c_hue_port));
   client.println("User-Agent: ESP8266/1.0");
   client.println("Connection: keep-alive");

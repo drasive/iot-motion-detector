@@ -1,5 +1,5 @@
 /*
-  IoT Motion Detector v0.2
+  IoT Motion Detector v1.0
   A $6 internet of things and easy to build motion detector.
 
   See iot-motion-detector_implementation.ino for implementation.
@@ -25,7 +25,7 @@ const char* c_hue_ip = "TO_BE_SET";                                  // Local IP
 const uint16_t c_hue_port = 80;                                      // Port of the Hue Bridge API
 const uint16_t c_hue_timeout = 10 * 1000;                            // Timeout for requests to the Hue Bridge in milliseconds
 const char* c_hue_user_id = "TO_BE_SET";                             // ID of the Hue Bridge user for authentication
-const char* c_hue_light_id = "1";                                    // ID of the Hue light to control
+const char* c_hue_light_identifier = "lights/1";                     // Identifier of the Hue light/lightgroup to control
 const char* c_hue_command_on_daytime = "{\"on\":true, \"bri\":254}"; // Command to turn the Hue light on during daytime
 const char* c_hue_command_on_nighttime = "{\"on\":true, \"bri\":1}"; // Command to turn the Hue light on during nighttime
 const char* c_hue_command_off = "{\"on\":false}";                    // Command to turn the Hue light off
