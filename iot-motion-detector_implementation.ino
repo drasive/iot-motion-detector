@@ -1,5 +1,5 @@
 /*
-  IoT Motion Detector v1.0
+  IoT Motion Detector v1.0.1
   A $6 internet of things and easy to build motion detector.
 
   See iot-motion-detector.ino for configuration.
@@ -28,7 +28,7 @@ void setup() {
 
   Serial.begin(c_baud_rate);
   Serial.println();
-  Serial.println(F("===== IoT Motion Detector v1.0 ====="));
+  Serial.println(F("===== IoT Motion Detector v1.0.1 ====="));
   Serial.println(F("https://github.com/drasive/iot-motion-detector"));
   Serial.println(F("Dimitri Vranken <me@dimitrivranken.com>"));
 
