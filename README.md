@@ -67,7 +67,7 @@ Name                        | Type     | Default Value              | Descriptio
 ----------------------------|----------|----------------------------|------------
 light_on_duration           | uint32_t | 60 * 1000 (60s)            | Time to keep the lights on in milliseconds
 nighttime_start             | uint16_t | 23 * 60 (23:00)            | Start of nighttime in minutes since midnight
-nighttime_duration          | uint16_t | 7 * 60 (07:00)             | Duration of nighttime in minutes
+nighttime_duration          | uint16_t | 7 * 60 (06:00)             | Duration of nighttime in minutes
 hue_ip                      | char*    | -                          | Local IP Address of the Hue Bridge
 hue_port                    | uint16_t | 80                         | Port of the Hue Bridge API
 hue_timeout                 | uint16_t | 10 * 1000 (10s)            | Timeout for requests to the Hue Bridge in milliseconds
