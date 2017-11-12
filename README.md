@@ -1,6 +1,6 @@
 # iot-motion-detector
 
-A $6 internet of things and easy to build motion detector.  
+A $7 internet of things and easy to build motion detector.  
 
 This implementation controls a Philips Hue light, but any IoT application can be implemented using the builtin WiFi adapter.
 
@@ -8,9 +8,9 @@ This implementation controls a Philips Hue light, but any IoT application can be
 Name                                 | Type            | Price (USD) | Link
 -------------------------------------|-----------------|-------------|-----
 WeMos D1 mini V2.2.0 (ESP8266 board) | Microcontroller | 4.09        | [banggood.com](https://www.banggood.com/WeMos-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html)
-HC-SR501                             | Motion detector | 1.95        | [banggood.com](https://www.banggood.com/HC-SR501-Human-Infrared-Sensor-Module-Including-Lens-p-972697.html)
+AM312                                | Motion detector | 2.55        | [banggood.com](https://www.banggood.com/Mini-IR-Infrared-Pyroelectric-PIR-Body-Motion-Human-Sensor-Detector-Module-p-1015337.html)
 
-Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
+Total cost: USD 6.64 (recorded 2017-09-16)
 
 ### Required equipment
 * Jumper wires
@@ -23,42 +23,22 @@ Total cost: USD 6.03 (excluding shipping, recorded 2017-09-16)
 ### Wiring
 ![Wiring Plan](/wiring/iot-motion-detector.png)
 
-### HC-SR501 configuration
-See http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/.
-It is recommended to set the time delay to the minimum as the software handles delays itself.
-
 ### Power Consumption
-The values in this section are calculated, I do not have the required hardware to make measurements.
+Standby (sensing for motion, not sending/receiving over WiFi): 15mA [4]
+Active (sensing for motion, sending/receiving over WiFi): 170mA [4]
 
-#### Standby
-Sensing for motion, not sending/receiving over WiFi.
-
-Component | State           | Power Draw (mA)
-----------|-----------------|----------------
-ESP8266   | Modem-Sleep [4] | 15
-HC-SR501  | On              |  0.065
-
-Total: 15.065mA
-
-#### Active
-Sensing for motion, sending/receiving over WiFi.
-
-Component | State          | Power Draw (mA)
-----------|----------------|----------------
-ESP8266   | Tx 802.11b [4] | 170
-HC-SR501  | On             |   0.065
-
-Total: 170.065mA
+These values are calculated and not confirmed by measurements.
 
 ### Using Different Hardware
-You can quite easily build this project with other ESP8266 boards and motion sensors other than the HC-SR501.
+You can quite easily build this project with other ESP8266 boards and motion detectors.
+Up to version [1.0.1](/tree/v1.0.1) this project used the HC-SR501 PIR.
 When doing so, watch out for the following possible differences (list not complete):
 
 Different ESP8266 board:
 - No USB connector (power delivery, programming)
-- No 5V output (power delivery to HC-SR501)
+- No 5V output (power delivery to motion detector)
 
-Motion sensor other than HC-SR501:
+Different motion detectors:
 - Required voltage (power delivery)
 
 ## Software
@@ -160,8 +140,10 @@ Selection criteria:
 
 Evaluated options:
 * HC-SR501
+* AM312
 
-The HC-SR501 passive infrared motion sensor satisfies all criteria and seems to be a hobbyist favorite.
+Both of these passive infrared motion sensors satisfy all criteria and seems to be hobbyist favorites.  
+The HC-SR501 triggers a lot of false positives so I switched to the AM312 which is much more reliable.
 
 #### Microcontroller
 Selection criteria:
@@ -185,10 +167,7 @@ has integrated WiFi and seems to be a hobbyist favorite.
 The system should be able to be powered by a single power cable or batteries.  
 
 The ESP8266 is powered by a micro USB cable. This enables the use of a USB power adaptor and battery packs.  
-The HC-SR501 is powered directly with 5V by the ESP8266.
-
-### HC-SR501 False Positives
-The HC-SR501 initially fired a lot of false positives. Putting a 15k Ohm resistor in the data line seems to have solved this problem (see section "Wiring").
+The AM312 is powered directly with 5V by the ESP8266.
 
 
 ## References
@@ -198,8 +177,6 @@ The HC-SR501 initially fired a lot of false positives. Putting a 15k Ohm resisto
 1. ESP8266 programming with Arduino IDE: https://arduino-esp8266.readthedocs.io/en/latest/installing.html#instructions
 1. ESP8266 power consumption: http://bbs.espressif.com/viewtopic.php?t=133
 1. ESP8266 power saving: https://github.com/esp8266/Arduino/issues/1381
-
-1. HC-SR501 configuration: http://henrysbench.capnfatz.com/henrys-bench/arduino-sensors-and-input/arduino-hc-sr501-motion-sensor-tutorial/
 
 1. Philips Hue API: https://developers.meethue.com/documentation/getting-started
 
